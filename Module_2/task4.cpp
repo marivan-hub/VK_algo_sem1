@@ -1,5 +1,12 @@
+/*
+Дано число N и N строк. Каждая строка содержит команду добавления или удаления натуральных чисел, а также запрос на получение k-ой порядковой статистики.
+Команда добавления числа A задается положительным числом A, команда удаления числа A задается отрицательным числом "-A".
+Запрос на получение k-ой порядковой статистики задается числом k. Требуемая скорость выполнения запроса - O(log n).
+*/
+
 #include <cassert>
 #include <iostream>
+#include <vector>
 
 template <typename T>
 struct DefaultComparator {
@@ -85,6 +92,15 @@ private:
         return balance(node);
     }
 
+    AVLNode<Key, Value>* find_and_erase_min(AVLNode<Key, Value>* node, AVLNode<Key, Value>** min_node) {
+        if (!node->left) {
+            *min_node = node;
+            return node->right;
+        }
+        node->left = find_and_erase_min(node->left, min_node);
+        return balance(node);
+    }
+
     AVLNode<Key, Value>* erase_aux(AVLNode<Key, Value>* node, const Key& key) {
         if (!node) {
             return nullptr;
@@ -123,14 +139,6 @@ private:
         return balance(node);
     }
 
-    AVLNode<Key, Value>* find_and_erase_min(AVLNode<Key, Value>* node, AVLNode<Key, Value>** min_node) {
-        if (!node->left) {
-            *min_node = node;
-            return node->right;
-        }
-        node->left = find_and_erase_min(node->left, min_node);
-        return balance(node);
-    }
 
     const Key& find_kth_aux(AVLNode<Key, Value>* node, size_t k) const {
         size_t left_size = node->left ? node->left->subtree_size : 0;
@@ -142,6 +150,13 @@ private:
         } else {
             return find_kth_aux(node->right, k - left_size - 1);
         }
+    }
+
+    AVLNode<Key, Value>* find_min(AVLNode<Key, Value>* node) const {
+        while (node && node->left) {
+            node = node->left;
+        }
+        return node;
     }
 
     AVLNode<Key, Value>* balance(AVLNode<Key, Value>* node) {

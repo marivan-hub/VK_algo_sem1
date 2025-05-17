@@ -92,6 +92,15 @@ private:
         return balance(node);
     }
 
+    AVLNode<Key, Value>* find_and_erase_min(AVLNode<Key, Value>* node, AVLNode<Key, Value>** min_node) {
+        if (!node->left) {
+            *min_node = node;
+            return node->right;
+        }
+        node->left = find_and_erase_min(node->left, min_node);
+        return balance(node);
+    }
+
     AVLNode<Key, Value>* erase_aux(AVLNode<Key, Value>* node, const Key& key) {
         if (!node) {
             return nullptr;
@@ -117,10 +126,13 @@ private:
                 delete node;
                 return left;
             } else {
-                AVLNode<Key, Value>* min_node = find_min(node->right);
+                AVLNode<Key, Value>* min_node = nullptr;
+                node->right = find_and_erase_min(node->right, &min_node);
                 node->key = min_node->key;
                 node->value = min_node->value;
-                node->right = erase_aux(node->right, min_node->key);
+                min_node->left = nullptr;
+                min_node->right = nullptr;
+                delete min_node;
             }
         }
 
